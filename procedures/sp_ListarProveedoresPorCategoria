@@ -1,0 +1,23 @@
+CREATE PROCEDURE lacc.sp_ListarProveedoresPorCategoria
+    @criterio_categoria VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        prov.id_persona AS ID_Proveedor,
+        cp.nombrecategoriaproveedor AS Categoria,
+        ISNULL(per.razon_social, per.nombres + ' ' + per.apaterno) AS [Nombre_Proveedor],
+        per.numero_documento AS [Documento],
+        per.telefono AS [Telefono_Contacto],
+        per.email AS [Email],
+        prov.contacto_principal AS [Contacto_Directo],
+        prov.calificacion AS [Calificacion]
+    FROM lacc.proveedor prov
+    INNER JOIN lacc.persona per ON prov.id_persona = per.id_persona
+    INNER JOIN lacc.categoria_proveedor cp ON prov.id_categoria = cp.id_categoria
+    WHERE per.estado = 'Activo'
+      AND cp.nombrecategoriaproveedor LIKE '%' + @criterio_categoria + '%'
+    ORDER BY prov.calificacion DESC;
+END;
+GO

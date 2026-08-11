@@ -1,0 +1,31 @@
+CREATE   PROCEDURE lacc.sp_ListarAlojamientos
+    @out_TotalHoteles INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    BEGIN TRY
+        SELECT 
+            aloj.id_alojamiento AS ID_Alojamiento,
+            aloj.Nombre AS Establecimiento,
+            ta.Nombre_Tipo AS Tipo_Alojamiento,
+            aloj.Categoria_Estrellas AS Estrellas,
+            ciu.nombreciudad AS Ciudad,
+            reg.nombreregion AS Region
+        FROM lacc.alojamiento aloj
+        INNER JOIN lacc.tipo_alojamiento ta ON aloj.id_tipoalojamiento = ta.id_tipoalojamiento
+        INNER JOIN lacc.direccion_alojamiento da ON aloj.id_alojamiento = da.id_alojamiento
+        INNER JOIN lacc.direccion dir ON da.id_direccion = dir.id_direccion
+        INNER JOIN lacc.ciudad ciu ON dir.id_ciudad = ciu.id_ciudad
+        INNER JOIN lacc.subregion sub ON ciu.id_subregion = sub.id_subregion
+        INNER JOIN lacc.region reg ON sub.id_region = reg.id_region
+        ORDER BY aloj.Categoria_Estrellas DESC, aloj.Nombre ASC;
+
+        SELECT @out_TotalHoteles = COUNT(*) FROM lacc.alojamiento;
+    END TRY
+    BEGIN CATCH
+        SET @out_TotalHoteles = 0;
+        PRINT '>> ERROR DE CATÁLOGO: ' + ERROR_MESSAGE();
+    END CATCH
+END;
+GO
